@@ -1,0 +1,61 @@
+
+repositories {
+  mavenCentral()
+}
+
+version = '4.4.0'
+String jarDir = 'build/jar'
+String pkgDir = 'com/sun/jna'
+
+configurations {
+  jna
+}
+
+dependencies {
+   jna "net.java.dev.jna:jna:${version}"
+}
+
+task clean(type: Delete) {
+  delete buildDir
+}
+
+task extractRelease(type: Copy) {
+  dependsOn clean
+  into jarDir
+  from { zipTree(configurations.jna.singleFile) }
+}
+
+task removeUnsupported(type: Delete) {
+  dependsOn extractRelease
+  delete "${jarDir}/${pkgDir}/aix-ppc"
+  delete "${jarDir}/${pkgDir}/aix-ppc64"
+  delete "${jarDir}/${pkgDir}/linux-aarch64"
+  delete "${jarDir}/${pkgDir}/linux-arm"
+  delete "${jarDir}/${pkgDir}/linux-armel"
+  delete "${jarDir}/${pkgDir}/linux-ppc"
+  delete "${jarDir}/${pkgDir}/linux-ppc64le"
+  delete "${jarDir}/${pkgDir}/linux-x86"
+  delete "${jarDir}/${pkgDir}/sunos-x86-64"
+}
+
+task replaceNative(type: Copy) {
+  dependsOn extractRelease
+  into "${jarDir}/${pkgDir}"
+  from('jna/native/target/native-linux-x86-64') {
+    into 'linux-x86-64'
+    include 'libjnidispatch.so'
+  }
+}
+
+task buildJar(type: Zip) {
+  dependsOn removeUnsupported, replaceNative
+  from jarDir
+  destinationDir = file('build/distributions')
+  version = project.version
+  baseName 'jna'
+  extension = 'jar'
+}
+
+task assemble {
+  dependsOn buildJar
+}

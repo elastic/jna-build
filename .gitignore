@@ -1,2 +1,4 @@
-jna
+.gradle
 .vagrant
+build
+jna
