@@ -42,6 +42,7 @@ end
 
 def configure_shared()
   return <<-SHELL
+    set -e
     yum -y install ant
     yum -y groupinstall "Development Tools"
   SHELL
