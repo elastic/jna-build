@@ -43,11 +43,16 @@ end
 def configure_shared()
   return <<-SHELL
     set -e
-    yum -y install ant
 
-    wget http://people.centos.org/tru/devtools-1.1/devtools-1.1.repo -P /etc/yum.repos.d
-    sh -c 'echo "enabled=1" >> /etc/yum.repos.d/devtools-1.1.repo'
-    yum -y install devtoolset-1.1
+    # install ant and necessary dependency
+    yum -y install ant
+    yum -y install ant-apache-regexp
+
+    yum -y install libtool
+
+    # install X11 development dependencies
+    yum -y install libX11-devel
+    yum -y install libXt-devel
 
     # build autoconf
     mkdir /tmp/autoconf
