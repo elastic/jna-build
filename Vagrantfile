@@ -45,6 +45,18 @@ def configure_shared()
     set -e
     yum -y install ant
     yum -y groupinstall "Development Tools"
+
+    # build autoconf
+    mkdir /tmp/autoconf
+    pushd /tmp/autoconf
+    curl -sS -L -O http://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.gz
+    tar zxf autoconf-2.68.tar.gz
+    cd autoconf-2.68
+    ./configure
+    make
+    make install
+    popd
+    rm -rf /tmp/autoconf
   SHELL
 end
 
