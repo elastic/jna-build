@@ -4,6 +4,7 @@ repositories {
 }
 
 version = '4.4.0'
+String jnaDir = 'build/jna'
 String jarDir = 'build/jar'
 String pkgDir = 'com/sun/jna'
 
@@ -38,10 +39,49 @@ task removeUnsupported(type: Delete) {
   delete "${jarDir}/${pkgDir}/sunos-x86-64"
 }
 
+/** A better exec task which captures output and only prints it on failure. */
+class LoggedExec extends Exec {
+  protected ByteArrayOutputStream output = new ByteArrayOutputStream()
+
+  LoggedExec() {
+    if (logger.isInfoEnabled() == false) {
+      standardOutput = output
+      errorOutput = output
+      ignoreExitValue = true
+      doLast {
+        if (execResult.exitValue != 0) {
+          output.toString('UTF-8').eachLine { line -> logger.error(line) }
+          throw new GradleException("Process '${executable} ${args.join(' ')}' finished with non-zero exit value ${execResult.exitValue}")
+        }
+      }
+    }
+  }
+}
+
+task checkoutJna(type: LoggedExec) {
+  doFirst {
+    file(jnaDir).parentFile.mkdirs()
+  }
+  commandLine 'git', 'clone', '-b', version, 'https://github.com/java-native-access/jna', jnaDir
+}
+
+task buildNative(type: LoggedExec) {
+  dependsOn checkoutJna
+  doFirst {
+    String versionLine = new File("${jnaDir}/src/com/sun/jna/Version.java").readLines('UTF-8').find {
+      it.contains('VERSION_NATIVE')
+    }
+    String nativeVersion = (versionLine =~ /\d+\.\d+\.\d+/)[0]
+    String arg = "cd /vagrant/${jnaDir}/native && ant -Djni.version=${nativeVersion}"
+    args 'ssh', '-c', arg
+  }
+  executable 'vagrant'
+}
+
 task replaceNative(type: Copy) {
-  dependsOn extractRelease
+  dependsOn extractRelease, buildNative
   into "${jarDir}/${pkgDir}"
-  from('jna/native/target/native-linux-x86-64') {
+  from("${jnaDir}/native/target/native-linux-x86-64") {
     into 'linux-x86-64'
     include 'libjnidispatch.so'
   }
