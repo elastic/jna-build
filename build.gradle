@@ -81,7 +81,12 @@ task checkoutJna(type: LoggedExec) {
 task buildNative(type: LoggedExec) {
   dependsOn checkoutJna
   doFirst {
-    String versionLine = new File("${jnaDir}/src/com/sun/jna/Version.java").readLines('UTF-8').find {
+    ByteArrayOutputStream output = new ByteArrayOutputStream()
+    project.exec {
+      commandLine = ['javap', '-constants', '-cp', configurations.jna.singleFile, '-c', 'com.sun.jna.Version']
+      standardOutput = output
+    }
+    String versionLine = output.toString('UTF-8').split('\n').find {
       it.contains('VERSION_NATIVE')
     }
     String nativeVersion = (versionLine =~ /\d+\.\d+\.\d+/)[0]
