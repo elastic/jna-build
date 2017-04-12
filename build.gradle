@@ -1,43 +1,11 @@
 
-repositories {
-  mavenCentral()
-}
+apply plugin: 'maven-publish'
 
+group = 'org.elasticsearch'
 version = '4.4.0'
 String jnaDir = 'build/jna'
 String jarDir = 'build/jar'
 String pkgDir = 'com/sun/jna'
-
-configurations {
-  jna
-}
-
-dependencies {
-   jna "net.java.dev.jna:jna:${version}"
-}
-
-task clean(type: Delete) {
-  delete buildDir
-}
-
-task extractRelease(type: Copy) {
-  dependsOn clean
-  into jarDir
-  from { zipTree(configurations.jna.singleFile) }
-}
-
-task removeUnsupported(type: Delete) {
-  dependsOn extractRelease
-  delete "${jarDir}/${pkgDir}/aix-ppc"
-  delete "${jarDir}/${pkgDir}/aix-ppc64"
-  delete "${jarDir}/${pkgDir}/linux-aarch64"
-  delete "${jarDir}/${pkgDir}/linux-arm"
-  delete "${jarDir}/${pkgDir}/linux-armel"
-  delete "${jarDir}/${pkgDir}/linux-ppc"
-  delete "${jarDir}/${pkgDir}/linux-ppc64le"
-  delete "${jarDir}/${pkgDir}/linux-x86"
-  delete "${jarDir}/${pkgDir}/sunos-x86-64"
-}
 
 /** A better exec task which captures output and only prints it on failure. */
 class LoggedExec extends Exec {
@@ -58,6 +26,47 @@ class LoggedExec extends Exec {
   }
 }
 
+/***********************************************************
+ *                      RELEASE TASKS                      *
+ ***********************************************************/
+
+/** Pull in the existing release of jna */
+repositories {
+  mavenCentral()
+}
+configurations {
+  jna
+}
+dependencies {
+   jna "net.java.dev.jna:jna:${version}"
+}
+
+task clean(type: Delete) {
+  delete buildDir
+}
+
+/** Copy the existing files from the release. */
+task extractRelease(type: Copy) {
+  dependsOn clean
+  into jarDir
+  from { zipTree(configurations.jna.singleFile) }
+}
+
+/** Remove native libs for platforms we do not support */
+task removeUnsupported(type: Delete) {
+  dependsOn extractRelease
+  delete "${jarDir}/${pkgDir}/aix-ppc"
+  delete "${jarDir}/${pkgDir}/aix-ppc64"
+  delete "${jarDir}/${pkgDir}/linux-aarch64"
+  delete "${jarDir}/${pkgDir}/linux-arm"
+  delete "${jarDir}/${pkgDir}/linux-armel"
+  delete "${jarDir}/${pkgDir}/linux-ppc"
+  delete "${jarDir}/${pkgDir}/linux-ppc64le"
+  delete "${jarDir}/${pkgDir}/linux-x86"
+  delete "${jarDir}/${pkgDir}/sunos-x86-64"
+}
+
+/** Checkout the jna project, so that native libs can be built.  */
 task checkoutJna(type: LoggedExec) {
   doFirst {
     file(jnaDir).parentFile.mkdirs()
@@ -65,6 +74,10 @@ task checkoutJna(type: LoggedExec) {
   commandLine 'git', 'clone', '-b', version, 'https://github.com/java-native-access/jna', jnaDir
 }
 
+/**
+  * Build the native lib for 64bit linux, using vagrant,
+  * against the oldest glibc supported (see Vagrantfile).
+  */
 task buildNative(type: LoggedExec) {
   dependsOn checkoutJna
   doFirst {
@@ -78,6 +91,7 @@ task buildNative(type: LoggedExec) {
   executable 'vagrant'
 }
 
+/** Replace the release version of 64bit linux with our locally built version. */
 task replaceNative(type: Copy) {
   dependsOn extractRelease, buildNative
   into "${jarDir}/${pkgDir}"
@@ -87,6 +101,7 @@ task replaceNative(type: Copy) {
   }
 }
 
+/** Repackage the jar now that it is fixed up with proper native libs. */
 task buildJar(type: Zip) {
   dependsOn removeUnsupported, replaceNative
   from jarDir
@@ -98,4 +113,38 @@ task buildJar(type: Zip) {
 
 task assemble {
   dependsOn buildJar
+}
+
+project.tasks.withType(GenerateMavenPom.class) { GenerateMavenPom t ->
+  // place the pom next to the jar it is for
+  t.destination = new File(project.buildDir, "distributions/jna-${project.version}.pom")
+  // build poms with assemble
+  project.assemble.dependsOn(t)
+}
+
+publishing {
+  publications {
+    jna(MavenPublication) {
+      artifactId = 'jna'
+      artifact buildJar
+      pom.withXml { XmlProvider xml ->
+        Node node = xml.asNode()
+        node.appendNode('name', 'Elastic JNA Distribution')
+        node.appendNode('description',
+          'A build of jna which supports all platforms supported by Elasticsearch')
+
+        Node license = node.appendNode('licenses').appendNode('license')
+        license.appendNode('name', 'The Apache Software License, Version 2.0')
+        license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+        license.appendNode('distribution', 'repo')
+
+        Node developer = node.appendNode('developers').appendNode('developer')
+        developer.appendNode('name', 'JNA Developers')
+        developer.appendNode('url', 'https://github.com/java-native-access/jna') 
+
+        Node scm = node.appendNode('scm')
+        scm.appendNode('url', 'https://github.com/java-native-access/jna')
+      }
+    }
+  }
 }
