@@ -57,6 +57,7 @@ task removeUnsupported(type: Delete) {
   dependsOn extractRelease
   delete "${jarDir}/${pkgDir}/aix-ppc"
   delete "${jarDir}/${pkgDir}/aix-ppc64"
+  delete "${jarDir}/${pkgDir}/linux-arm"
   delete "${jarDir}/${pkgDir}/linux-armel"
   delete "${jarDir}/${pkgDir}/linux-ppc"
   delete "${jarDir}/${pkgDir}/linux-ppc64le"
