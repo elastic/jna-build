@@ -2,7 +2,9 @@
 apply plugin: 'maven-publish'
 
 group = 'org.elasticsearch'
-version = '4.4.0'
+String upstreamVersion = '4.4.0'
+String localPrerelease = '1'
+version = "${upstreamVersion}-${localPrerelease}"
 String jnaDir = 'build/jna'
 String jarDir = 'build/jar'
 String pkgDir = 'com/sun/jna'
@@ -38,7 +40,7 @@ configurations {
   jna
 }
 dependencies {
-   jna "net.java.dev.jna:jna:${version}"
+   jna "net.java.dev.jna:jna:${upstreamVersion}"
 }
 
 task clean(type: Delete) {
@@ -70,7 +72,7 @@ task checkoutJna(type: LoggedExec) {
   doFirst {
     file(jnaDir).parentFile.mkdirs()
   }
-  commandLine 'git', 'clone', '-b', version, 'https://github.com/java-native-access/jna', jnaDir
+  commandLine 'git', 'clone', '-b', upstreamVersion, 'https://github.com/java-native-access/jna', jnaDir
 }
 
 /**
