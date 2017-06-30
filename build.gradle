@@ -138,6 +138,7 @@ publishing {
         node.appendNode('name', 'Elastic JNA Distribution')
         node.appendNode('description',
           'A build of jna which supports all platforms supported by Elasticsearch')
+        node.appendNode('url', 'https://github.com/elastic/jna-build')
 
         Node license = node.appendNode('licenses').appendNode('license')
         license.appendNode('name', 'The Apache Software License, Version 2.0')
