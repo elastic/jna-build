@@ -4,9 +4,10 @@ It builds native linux bits for jna in vagrant, and uses the provided native bit
 Publish to Maven Central
 ------------------------
 
-First set a shell variable for convenience:
+First set shell variables for convenience:
 
-    export PRERELEASE=2 # or whatever ordinal makes sense
+    export VERSION=4.4.0  # match whatever's in build.gradle
+    export PRERELEASE=2   # or whatever ordinal makes sense
 
 Ensure you have the OSSRH Sonatype staging environment set up in
 ~/.m2/settings.xml:
@@ -27,10 +28,10 @@ In order for OSSRH to accept the package, it must have sources and
 javadoc jars as well.  We don't have any automation here to build
 them, so simply reuse the upstream net.java.dev/jna ones:
 
-    curl -L -o target/jna-4.4.0-${PRERELEASE}-sources.jar \
-      https://oss.sonatype.org/content/repositories/releases/net/java/dev/jna/jna/4.4.0/jna-4.4.0-sources.jar
-    curl -L -o target/jna-4.4.0-${PRERELEASE}-javadoc.jar \
-      https://oss.sonatype.org/content/repositories/releases/net/java/dev/jna/jna/4.4.0/jna-4.4.0-javadoc.jar
+    curl -L -o target/jna-${VERSION}-${PRERELEASE}-sources.jar \
+      https://oss.sonatype.org/content/repositories/releases/net/java/dev/jna/jna/${VERSION}/jna-${VERSION}-sources.jar
+    curl -L -o target/jna-${VERSION}-${PRERELEASE}-javadoc.jar \
+      https://oss.sonatype.org/content/repositories/releases/net/java/dev/jna/jna/${VERSION}/jna-${VERSION}-javadoc.jar
 
 Now upload to OSSRH, signing with the Elasticsearch key (it will
 prompt for passphrase):
@@ -42,8 +43,8 @@ prompt for passphrase):
       -Dpackaging=jar \
       -DrepositoryId=sonatype-nexus-staging \
       -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-      -DpomFile=build/distributions/jna-4.4.0-${PRERELEASE}.pom \
-      -Dfile=build/distributions/jna-4.4.0-${PRERELEASE}.jar \
-      -Dsources=target/jna-4.4.0-${PRERELEASE}-sources.jar \
-      -Djavadoc=target/jna-4.4.0-${PRERELEASE}-javadoc.jar \
+      -DpomFile=build/distributions/jna-${VERSION}-${PRERELEASE}.pom \
+      -Dfile=build/distributions/jna-${VERSION}-${PRERELEASE}.jar \
+      -Dsources=target/jna-${VERSION}-${PRERELEASE}-sources.jar \
+      -Djavadoc=target/jna-${VERSION}-${PRERELEASE}-javadoc.jar \
       -Dgpg.keyname=D88E42B4
