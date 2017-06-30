@@ -3,8 +3,14 @@ apply plugin: 'maven-publish'
 
 group = 'org.elasticsearch'
 String upstreamVersion = '4.4.0'
-String localPrerelease = '1'
-version = "${upstreamVersion}-${localPrerelease}"
+
+if (System.getProperty("prerelease") != null) {
+  String localPrerelease = System.getProperty("prerelease")
+  version = "${upstreamVersion}-${localPrerelease}"
+} else {
+  version = upstreamVersion
+}
+
 String jnaDir = 'build/jna'
 String jarDir = 'build/jar'
 String pkgDir = 'com/sun/jna'
