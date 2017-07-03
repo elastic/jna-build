@@ -4,9 +4,13 @@ apply plugin: 'maven-publish'
 group = 'org.elasticsearch'
 String upstreamVersion = '4.4.0'
 
-if (System.getProperty("prerelease") != null) {
-  String localPrerelease = System.getProperty("prerelease")
-  version = "${upstreamVersion}-${localPrerelease}"
+// Rarely, modifications may need to be made to the jna jar that
+// aren't reflected in the upstream.  A suffix can be supplied to bump
+// the local version.  See readme for details.
+String versionSuffix = System.getProperty("version.suffix")
+
+if (versionSuffix != null) {
+  version = "${upstreamVersion}${versionSuffix}"
 } else {
   version = upstreamVersion
 }
