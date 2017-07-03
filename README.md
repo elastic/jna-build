@@ -15,7 +15,7 @@ First set shell variables for convenience:
     export VERSION=4.4.0
 
 Ensure you have the OSSRH Sonatype staging environment set up in
-~/.m2/settings.xml:
+`~/.m2/settings.xml`:
 
     <server>
       <id>sonatype-nexus-staging</id>
