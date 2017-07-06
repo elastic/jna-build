@@ -2,7 +2,15 @@
 apply plugin: 'maven-publish'
 
 group = 'org.elasticsearch'
-version = '4.4.0'
+String upstreamVersion = '4.4.0'
+
+// Rarely, modifications may need to be made to the jna jar that
+// aren't reflected in the upstream.  A suffix can be supplied to bump
+// the local version.  See readme for details.
+String versionSuffix = System.getProperty("version.suffix", "")
+
+version = "${upstreamVersion}${versionSuffix}"
+
 String jnaDir = 'build/jna'
 String jarDir = 'build/jar'
 String pkgDir = 'com/sun/jna'
@@ -38,7 +46,7 @@ configurations {
   jna
 }
 dependencies {
-   jna "net.java.dev.jna:jna:${version}"
+   jna "net.java.dev.jna:jna:${upstreamVersion}"
 }
 
 task clean(type: Delete) {
@@ -70,7 +78,7 @@ task checkoutJna(type: LoggedExec) {
   doFirst {
     file(jnaDir).parentFile.mkdirs()
   }
-  commandLine 'git', 'clone', '-b', version, 'https://github.com/java-native-access/jna', jnaDir
+  commandLine 'git', 'clone', '-b', upstreamVersion, 'https://github.com/java-native-access/jna', jnaDir
 }
 
 /**
@@ -136,6 +144,7 @@ publishing {
         node.appendNode('name', 'Elastic JNA Distribution')
         node.appendNode('description',
           'A build of jna which supports all platforms supported by Elasticsearch')
+        node.appendNode('url', 'https://github.com/java-native-access/jna')
 
         Node license = node.appendNode('licenses').appendNode('license')
         license.appendNode('name', 'The Apache Software License, Version 2.0')
