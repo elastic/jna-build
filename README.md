@@ -28,18 +28,15 @@ Ensure you have the OSSRH Sonatype staging environment set up in
 
 Then build:
 
-    % vagrant up
-    % gradle assemble generatePomFileForJnaPublication
-    % vagrant halt
+    % vagrant up && gradle assemble && vagrant halt
 
 In order for OSSRH to accept the package, it must have sources and
 javadoc jars as well.  We don't have any automation here to build
 them, so simply reuse from net.java.dev/jna:
 
-    % mkdir -p tmp
-    % curl -L -o tmp/jna-${VERSION}-sources.jar \
+    % curl -L -o build/jna-${VERSION}-sources.jar \
       https://oss.sonatype.org/content/repositories/releases/net/java/dev/jna/jna/${VERSION}/jna-${VERSION}-sources.jar
-    % curl -L -o tmp/jna-${VERSION}-javadoc.jar \
+    % curl -L -o build/jna-${VERSION}-javadoc.jar \
       https://oss.sonatype.org/content/repositories/releases/net/java/dev/jna/jna/${VERSION}/jna-${VERSION}-javadoc.jar
 
 Now upload to OSSRH, signing with the Elasticsearch key (it will
@@ -55,8 +52,8 @@ but please try to avoid):
         -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
         -DpomFile=build/distributions/jna-${VERSION}.pom \
         -Dfile=build/distributions/jna-${VERSION}.jar \
-        -Dsources=tmp/jna-${VERSION}-sources.jar \
-        -Djavadoc=tmp/jna-${VERSION}-javadoc.jar \
+        -Dsources=build/jna-${VERSION}-sources.jar \
+        -Djavadoc=build/jna-${VERSION}-javadoc.jar \
         -Dgpg.keyname=D88E42B4
 
 
@@ -79,18 +76,15 @@ Set shell variables for convenience:
 Then build the artifact and pom as usual, but supply `version.suffix`
 property:
 
-    % vagrant up
-    % gradle assemble generatePomFileForJnaPublication -Dversion.suffix=$SUFFIX
-    % vagrant halt
+    % vagrant up && gradle assemble -Dversion.suffix=$SUFFIX && vagrant halt
 
 In order for OSSRH to accept the package, it must have sources and
 javadoc jars as well.  We don't have any automation here to build
 them, so simply reuse from upstream net.java.dev/jna:
 
-    % mkdir -p tmp
-    % curl -L -o tmp/jna-${VERSION}${SUFFIX}-sources.jar \
+    % curl -L -o build/jna-${VERSION}${SUFFIX}-sources.jar \
       https://oss.sonatype.org/content/repositories/releases/net/java/dev/jna/jna/${VERSION}/jna-${VERSION}-sources.jar
-    % curl -L -o tmp/jna-${VERSION}${SUFFIX}-javadoc.jar \
+    % curl -L -o build/jna-${VERSION}${SUFFIX}-javadoc.jar \
       https://oss.sonatype.org/content/repositories/releases/net/java/dev/jna/jna/${VERSION}/jna-${VERSION}-javadoc.jar
 
 Now upload to OSSRH, signing with the Elasticsearch key:
@@ -104,8 +98,8 @@ Now upload to OSSRH, signing with the Elasticsearch key:
       -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
       -DpomFile=build/distributions/jna-${VERSION}${SUFFIX}.pom \
       -Dfile=build/distributions/jna-${VERSION}${SUFFIX}.jar \
-      -Dsources=tmp/jna-${VERSION}${SUFFIX}-sources.jar \
-      -Djavadoc=tmp/jna-${VERSION}${SUFFIX}-javadoc.jar \
+      -Dsources=build/jna-${VERSION}${SUFFIX}-sources.jar \
+      -Djavadoc=build/jna-${VERSION}${SUFFIX}-javadoc.jar \
       -Dgpg.keyname=D88E42B4
 
 
