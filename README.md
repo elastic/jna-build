@@ -15,7 +15,7 @@ local version exactly matches net.java.dev/jna.
 First set shell variables for convenience:
 
     # match whatever's in build.gradle
-    export VERSION=4.4.0
+    export VERSION=4.5.1
 
 Ensure you have the OSSRH Sonatype staging environment set up in
 `~/.m2/settings.xml`:

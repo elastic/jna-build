@@ -2,7 +2,7 @@
 apply plugin: 'maven-publish'
 
 group = 'org.elasticsearch'
-String upstreamVersion = '4.4.0'
+String upstreamVersion = '4.5.1'
 
 // Rarely, modifications may need to be made to the jna jar that
 // aren't reflected in the upstream.  A suffix can be supplied to bump
