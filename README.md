@@ -17,6 +17,9 @@ First set shell variables for convenience:
     # match whatever's in build.gradle
     export VERSION=4.5.1
 
+Note that when upgrading the jna version, the `upstreamVersion` variable 
+in the build file should be updated too.
+
 Ensure you have the OSSRH Sonatype staging environment set up in
 `~/.m2/settings.xml`:
 
