@@ -147,7 +147,7 @@ publishing {
         node.appendNode('url', 'https://github.com/java-native-access/jna')
 
         Node license = node.appendNode('licenses').appendNode('license')
-        license.appendNode('name', 'The Apache Software License, Version 2.0')
+        license.appendNode('name', 'Apache License, Version 2.0')
         license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
         license.appendNode('distribution', 'repo')
 
