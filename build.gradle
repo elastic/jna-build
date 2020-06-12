@@ -2,7 +2,7 @@
 apply plugin: 'maven-publish'
 
 group = 'org.elasticsearch'
-String upstreamVersion = '4.5.1'
+String upstreamVersion = '5.5.0'
 
 // Rarely, modifications may need to be made to the jna jar that
 // aren't reflected in the upstream.  A suffix can be supplied to bump
@@ -65,12 +65,22 @@ task removeUnsupported(type: Delete) {
   dependsOn extractRelease
   delete "${jarDir}/${pkgDir}/aix-ppc"
   delete "${jarDir}/${pkgDir}/aix-ppc64"
+  delete "${jarDir}/${pkgDir}/freebsd-x86"
+  delete "${jarDir}/${pkgDir}/freebsd-x86-64"
   delete "${jarDir}/${pkgDir}/linux-arm"
   delete "${jarDir}/${pkgDir}/linux-armel"
   delete "${jarDir}/${pkgDir}/linux-ppc"
   delete "${jarDir}/${pkgDir}/linux-ppc64le"
+  delete "${jarDir}/${pkgDir}/linux-s390x"
   delete "${jarDir}/${pkgDir}/linux-x86"
+  delete "${jarDir}/${pkgDir}/linux-mips64el"
+  delete "${jarDir}/${pkgDir}/openbsd-x86"
+  delete "${jarDir}/${pkgDir}/openbsd-x86-64"
+  delete "${jarDir}/${pkgDir}/sunos-sparc"
+  delete "${jarDir}/${pkgDir}/sunos-sparcv9"
+  delete "${jarDir}/${pkgDir}/sunos-x86"
   delete "${jarDir}/${pkgDir}/sunos-x86-64"
+  delete "${jarDir}/${pkgDir}/win32-x86"
 }
 
 /** Checkout the jna project, so that native libs can be built.  */
