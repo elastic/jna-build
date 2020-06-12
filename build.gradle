@@ -1,4 +1,3 @@
-
 apply plugin: 'maven-publish'
 
 group = 'org.elasticsearch'
@@ -63,24 +62,25 @@ task extractRelease(type: Copy) {
 /** Remove native libs for platforms we do not support */
 task removeUnsupported(type: Delete) {
   dependsOn extractRelease
-  delete "${jarDir}/${pkgDir}/aix-ppc"
-  delete "${jarDir}/${pkgDir}/aix-ppc64"
-  delete "${jarDir}/${pkgDir}/freebsd-x86"
-  delete "${jarDir}/${pkgDir}/freebsd-x86-64"
-  delete "${jarDir}/${pkgDir}/linux-arm"
-  delete "${jarDir}/${pkgDir}/linux-armel"
-  delete "${jarDir}/${pkgDir}/linux-ppc"
-  delete "${jarDir}/${pkgDir}/linux-ppc64le"
-  delete "${jarDir}/${pkgDir}/linux-s390x"
-  delete "${jarDir}/${pkgDir}/linux-x86"
-  delete "${jarDir}/${pkgDir}/linux-mips64el"
-  delete "${jarDir}/${pkgDir}/openbsd-x86"
-  delete "${jarDir}/${pkgDir}/openbsd-x86-64"
-  delete "${jarDir}/${pkgDir}/sunos-sparc"
-  delete "${jarDir}/${pkgDir}/sunos-sparcv9"
-  delete "${jarDir}/${pkgDir}/sunos-x86"
-  delete "${jarDir}/${pkgDir}/sunos-x86-64"
-  delete "${jarDir}/${pkgDir}/win32-x86"
+  List<String> inclusions = ['darwin', 'linux-aarch64', 'linux-x86-64', 'win32-x86-64']
+  for (File arch : file("${jarDir}/${pkgDir}/").listFiles()) {
+    // skip non-directories
+    if (arch.isDirectory() == false) {
+      continue
+    }
+    // skip directories that do not contain native libraries
+    if (new File(arch, 'jnidispatch.dll').exists() == false &&
+      new File(arch, 'libjnidispatch.a').exists() == false &&
+      new File(arch, 'libjnidispatch.jnilib').exists() == false &&
+      new File(arch, 'libjnidispatch.so').exists() == false) {
+      continue
+    }
+    // skip inclusions
+    if (inclusions.contains(arch.getName())) {
+      continue
+    }
+    delete arch
+  }
 }
 
 /** Checkout the jna project, so that native libs can be built.  */
