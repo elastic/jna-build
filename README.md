@@ -2,9 +2,8 @@ Elasticsearch JNA Build
 =======================
 
 This project exists in order to build a jna jar which supports
-platforms supported by elastic.  It builds native linux bits for jna
-in vagrant, and uses the provided native bits for mac and windows.
-
+platforms supported by Elastic. We strip out native libraries
+for platforms that we do not support.
 
 Publish to Maven Central (Normal case)
 --------------------------------------
@@ -31,7 +30,7 @@ Ensure you have the OSSRH Sonatype staging environment set up in
 
 Then build:
 
-    % vagrant up && gradle assemble && vagrant halt
+    % gradle assemble
 
 In order for OSSRH to accept the package, it must have sources and
 javadoc jars as well.  We don't have any automation here to build
@@ -79,7 +78,7 @@ Set shell variables for convenience:
 Then build the artifact and pom as usual, but supply `version.suffix`
 property:
 
-    % vagrant up && gradle assemble -Dversion.suffix=$SUFFIX && vagrant halt
+    % gradle assemble -Dversion.suffix=$SUFFIX
 
 In order for OSSRH to accept the package, it must have sources and
 javadoc jars as well.  We don't have any automation here to build

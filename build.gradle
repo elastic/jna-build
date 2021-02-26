@@ -91,41 +91,9 @@ task checkoutJna(type: LoggedExec) {
   commandLine 'git', 'clone', '-b', upstreamVersion, 'https://github.com/java-native-access/jna', jnaDir
 }
 
-/**
-  * Build the native lib for 64bit linux, using vagrant,
-  * against the oldest glibc supported (see Vagrantfile).
-  */
-task buildNative(type: LoggedExec) {
-  dependsOn checkoutJna
-  doFirst {
-    ByteArrayOutputStream output = new ByteArrayOutputStream()
-    project.exec {
-      commandLine = ['javap', '-constants', '-cp', configurations.jna.singleFile, '-c', 'com.sun.jna.Version']
-      standardOutput = output
-    }
-    String versionLine = output.toString('UTF-8').split('\n').find {
-      it.contains('VERSION_NATIVE')
-    }
-    String nativeVersion = (versionLine =~ /\d+\.\d+\.\d+/)[0]
-    String arg = "cd /vagrant/${jnaDir}/native && ant -Djni.version=${nativeVersion}"
-    args 'ssh', '-c', arg
-  }
-  executable 'vagrant'
-}
-
-/** Replace the release version of 64bit linux with our locally built version. */
-task replaceNative(type: Copy) {
-  dependsOn extractRelease, buildNative
-  into "${jarDir}/${pkgDir}"
-  from("${jnaDir}/native/target/native-linux-x86-64") {
-    into 'linux-x86-64'
-    include 'libjnidispatch.so'
-  }
-}
-
 /** Repackage the jar now that it is fixed up with proper native libs. */
 task buildJar(type: Zip) {
-  dependsOn removeUnsupported, replaceNative
+  dependsOn removeUnsupported
   from jarDir
   destinationDir = file('build/distributions')
   version = project.version
