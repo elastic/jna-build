@@ -71,7 +71,8 @@ but we introduce a `suffix`.
 Set shell variables for convenience:
 
     # Match whatever's in build.gradle
-    export VERSION=4.4.0
+    export VERSION=$(sed -e $'/^String upstreamVersion/!d; s/.*\'\\(.*\\)\'$/\\1/' build.gradle)
+    echo $VERSION
 
     # Start at 1, but this may be incremented to whatever makes sense
     export SUFFIX="-2"
