@@ -14,7 +14,8 @@ local version exactly matches net.java.dev/jna.
 First set shell variables for convenience:
 
     # match whatever's in build.gradle
-    export VERSION=4.5.1
+    export VERSION=$(sed -e $'/^String upstreamVersion/!d; s/.*\'\\(.*\\)\'$/\\1/' build.gradle)
+    echo $VERSION # should look like 5.10.0
 
 Note that when upgrading the jna version, the `upstreamVersion` variable 
 in the build file should be updated too.
